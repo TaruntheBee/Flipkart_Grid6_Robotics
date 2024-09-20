@@ -64,8 +64,7 @@ pip install -r requirements.txt
 
 ### How to Run the Project
 
-After setting up the virtual environment and installing the dependencies, ensure that your Arduino is properly connected.
-      - Run the main script:
-        ```bash
-        python main.py
-        ```
+After setting up the virtual environment and installing the dependencies, ensure that your Arduino is properly connected. Run the main script:
+```bash
+python main.py
+```
