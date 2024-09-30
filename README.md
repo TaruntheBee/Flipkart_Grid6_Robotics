@@ -56,7 +56,7 @@ Follow the steps below to set up the project on your local machine.
 
 ### Installing Requirements
 
-Once the virtual environment is activated, install the necessary dependencies from the `requirements.txt` file:
+Once the virtual environment is activated, install the necessary dependencies from the `requirements.text` file:
 
 ```bash
 pip install -r requirements.txt
