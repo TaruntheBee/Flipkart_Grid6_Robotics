@@ -255,7 +255,7 @@ stop_button.place(x=760, y=600)
 catalog_button = tk.Button(root, text="Show Catalog", command=show_catalog)
 catalog_button.place(x=660, y=650)
 
-# Start the IR counter update loop
+# #Start the IR counter update loop
 # update_ir_counter()
 
 # Start the Tkinter main loop
