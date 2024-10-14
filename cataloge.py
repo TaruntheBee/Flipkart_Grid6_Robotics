@@ -17,14 +17,16 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 reader = easyocr.Reader(['en'])
 
 # Global variables for storing product details
+idx=-1
 company_name = ""
 product_name = ""
 mrp = ""
 quantity = ""
 other_details = []
-ir_counter = 0  # To store the counter value from Arduino
+ir_counter = -1  # To store the counter value from Arduino
 ir_data = {}
 ir_state = 0
+catalog_cnt_flag=0
 
 # Variables to control video capture
 running = False
@@ -33,9 +35,9 @@ arduino = serial.Serial('COM3', 9600, timeout=1)  # Replace 'COM3' with your por
 
 # Product catalog (with added expiry field and count)
 catalog = [
-    {"comp_name": "kinley", "prod_name": "water bottle", "mrp": 20, "expiry": "2025-12", "count": 0},
-    {"comp_name": "nestle", "prod_name": "kitkat", "mrp": 20, "expiry": "2024-06", "count": 0},
-    {"comp_name": "Best Web Cam Company", "prod_name": "web cam", "mrp": 900, "expiry": "2026-03", "count": 0}
+    {"id":0, "comp_name": "kinley", "prod_name": "water bottle", "mrp": 20, "expiry": "2025-12", "count": 0},
+    {"id":1, "comp_name": "nestle", "prod_name": "kitkat", "mrp": 20, "expiry": "2024-06", "count": 0},
+    {"id":2, "comp_name": "Best Web Cam Company", "prod_name": "web cam", "mrp": 900, "expiry": "2026-03", "count": 0}
 ]
 
 # Function to reset the product details
@@ -72,7 +74,7 @@ def match_product(text):
 
 # Function to extract text details
 def extract_text_details(results):
-    global company_name, product_name, mrp, quantity, other_details, catalog
+    global company_name, product_name, mrp, quantity, other_details, catalog, catalog_cnt_flag, idx
 
     # Sort detected text boxes by height to identify largest fonts
     results = sorted(results, key=lambda x: abs(x[0][0][1] - x[0][2][1]), reverse=True)
@@ -95,7 +97,15 @@ def extract_text_details(results):
         company_name = matched_item['comp_name']
         product_name = matched_item['prod_name']
         mrp = matched_item['mrp']
-        matched_item['count'] += 1  # Increment count of the matched item
+        idx = matched_item['id']
+        # if ir_state == 1:
+        #     if not catalog_cnt_flag:
+        #         print(matched_item['count'])
+        #         catalog_cnt_flag = 1
+        #         matched_item['count']+=1
+        # else:
+        #     catalog_cnt_flag = 0
+        quantity = matched_item['count']
 
         # Update the GUI with extracted details
         update_product_details(matched_item)
@@ -116,12 +126,14 @@ def update_product_details(item=None):
 
 # Function to update IR counter from Arduino in the GUI
 def update_ir_counter():
-    global ir_counter, ir_data, ir_state
+    global ir_counter, ir_data, ir_state, catalog, idx
     try:
         arduino_data = arduino.readline().decode().strip()  # Read data from Arduino
         ir_data = json.loads(arduino_data)
         if arduino_data:
             ir_data = json.loads(arduino_data)  # Convert to integer
+            if (ir_data['count'] > ir_counter):
+                catalog[idx]['count'] += 1
             ir_counter = ir_data["count"]
             ir_state = ir_data["state"]
             ir_counter_label.config(text=f"IR Counter: {ir_counter}")  # Update the label
